@@ -4,11 +4,15 @@ on:
   workflow_dispatch:
     inputs:
       trigger_source:
-        description: "Who started the workflow"
+        description: "Who triggered the workflow"
         required: true
         default: "n8n"
       time:
-        description: "Time when triggered"
+        description: "Trigger timestamp"
+        required: true
+        default: "none"
+      resumeUrl:
+        description: "URL to notify n8n when job is done"
         required: true
         default: "none"
 
@@ -16,5 +20,10 @@ jobs:
   run-demo:
     runs-on: ubuntu-latest
     steps:
-      - name: Print start message
-        run: echo "Workflow triggered by ${{ github.event.inputs.trigger_source }} at ${{ github.event.inputs.time }}"
+      - name: Start message
+        run: echo "Triggered by ${{ github.event.inputs.trigger_source }} at ${{ github.event.inputs.time }}"
+      - name: Callback n8n when complete
+        run: |
+          curl -X POST "${{ github.event.inputs.resumeUrl }}" \
+            -H "Content-Type: application/json" \
+            -d '{"status":"success"}'
